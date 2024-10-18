@@ -5,12 +5,14 @@ import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
 
+
 public class ClientApp extends Frame implements ActionListener, Runnable {
-    private TextField inputField = new TextField();  // Поле для ввода суммы
-    private TextArea outputArea = new TextArea();    // Поле для вывода информации
+    private TextField inputField = new TextField();
+    private TextArea outputArea = new TextArea();
     private Socket socket;
     private DataInputStream dis;
     private DataOutputStream dos;
+    private Button button_exit = new Button("Exit");
 
     public ClientApp() {
         // Создаем окно
@@ -20,16 +22,26 @@ public class ClientApp extends Frame implements ActionListener, Runnable {
         inputField.setBounds(50, 50, 200, 30);
         outputArea.setBounds(50, 100, 200, 150);
         outputArea.setEditable(false);
+        add(button_exit);
+        button_exit.setBounds(100, 260, 100, 30);
+        button_exit.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == button_exit)
+                    System.exit(0);
+            }
+        });
+
+
         add(inputField);
         add(outputArea);
 
-        inputField.addActionListener(this);  // При нажатии Enter обрабатываем ввод
+        inputField.addActionListener(this);  // При нажатии Enter
 
         setVisible(true);
         setLocationRelativeTo(null);
 
         try {
-            socket = new Socket("127.0.0.1", 3001);  // Подключение к серверу
+            socket = new Socket("192.168.170.91", 3001);
             dis = new DataInputStream(socket.getInputStream());
             dos = new DataOutputStream(socket.getOutputStream());
         } catch (IOException e) {
@@ -40,24 +52,18 @@ public class ClientApp extends Frame implements ActionListener, Runnable {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            // Получаем введенное значение
             String amountStr = inputField.getText();
             int amount = Integer.parseInt(amountStr);
 
-            // Проверяем, что сумма отрицательная
             if (amount < 0) {
-                // Отправляем введенную сумму на сервер
                 dos.writeUTF(amountStr);
                 dos.flush();
             } else {
-                // Выводим предупреждение, если введено не отрицательное число
                 outputArea.append("Введите отрицательное число!\n");
             }
 
-            // Очищаем поле ввода
             inputField.setText("");
         } catch (NumberFormatException ex) {
-            // Если ввод не является числом, выводим сообщение об ошибке
             outputArea.append("Введите корректное число!\n");
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -70,7 +76,7 @@ public class ClientApp extends Frame implements ActionListener, Runnable {
             while (true) {
                 // Чтение ответа от сервера
                 String response = dis.readUTF();
-                outputArea.append(response + "\n");  // Выводим ответ в текстовое поле
+                outputArea.append(response + "\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -79,6 +85,6 @@ public class ClientApp extends Frame implements ActionListener, Runnable {
 
     public static void main(String[] args) {
         ClientApp clientApp = new ClientApp();
-        new Thread(clientApp).start();  // Запуск клиента в отдельном потоке
+        new Thread(clientApp).start();
     }
 }

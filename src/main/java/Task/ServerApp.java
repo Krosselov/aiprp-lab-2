@@ -8,8 +8,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class ServerApp extends Frame implements Runnable {
-    private static int balance = 0;  // Общий счет
-    private TextArea textArea = new TextArea();  // Для отображения баланса
+    private static int balance = 0;
+    private TextArea textArea = new TextArea();
     private ServerSocket serverSocket;
     private Button button = new Button("Add Client");
 
@@ -32,20 +32,17 @@ public class ServerApp extends Frame implements Runnable {
         });
         add(textArea);
 
-
-
         updateBalance();
         setVisible(true);
         setLocationRelativeTo(null);
 
         try {
-            serverSocket = new ServerSocket(3001);  // Создаем сервер на порту 3001
+            serverSocket = new ServerSocket(3001);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Метод для обновления отображаемого баланса
     private void updateBalance() {
         textArea.setText("Current balance: " + balance);
     }
@@ -54,15 +51,14 @@ public class ServerApp extends Frame implements Runnable {
     public void run() {
         while (true) {
             try {
-                Socket clientSocket = serverSocket.accept();  // Ожидание подключения клиента
-                new ClientHandler(clientSocket).start();  // Запуск потока для каждого клиента
+                Socket clientSocket = serverSocket.accept();
+                new ClientHandler(clientSocket).start();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    // Класс для обработки каждого клиента
     private class ClientHandler extends Thread {
         private Socket socket;
 
@@ -76,19 +72,15 @@ public class ServerApp extends Frame implements Runnable {
                  DataOutputStream dos = new DataOutputStream(socket.getOutputStream())) {
 
                 while (true) {
-                    // Чтение суммы от клиента
                     String input = dis.readUTF();
                     int amount = Integer.parseInt(input);
 
-                    // Обновление баланса
                     synchronized (ServerApp.class) {
                         balance += amount;
                     }
 
-                    // Обновляем отображение баланса
                     updateBalance();
 
-                    // Отправляем обновленный баланс клиенту
                     dos.writeUTF("Updated balance: " + balance);
                     dos.flush();
                 }
@@ -106,6 +98,6 @@ public class ServerApp extends Frame implements Runnable {
 
     public static void main(String[] args) {
         ServerApp serverApp = new ServerApp();
-        new Thread(serverApp).start();  // Запуск сервера в отдельном потоке
+        new Thread(serverApp).start();
     }
 }

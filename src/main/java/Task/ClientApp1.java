@@ -6,11 +6,12 @@ import java.io.*;
 import java.net.Socket;
 
 public class ClientApp1 extends Frame implements ActionListener, Runnable  {
-    private TextField inputField = new TextField();  // Поле для ввода суммы
-    private TextArea outputArea = new TextArea();    // Поле для вывода информации
+    private TextField inputField = new TextField();
+    private TextArea outputArea = new TextArea();
     private Socket socket;
     private DataInputStream dis;
     private DataOutputStream dos;
+    private Button button_exit = new Button("Exit");
 
     public ClientApp1() {
         // Создаем окно
@@ -22,8 +23,16 @@ public class ClientApp1 extends Frame implements ActionListener, Runnable  {
         outputArea.setEditable(false);
         add(inputField);
         add(outputArea);
+        add(button_exit);
+        button_exit.setBounds(100, 260, 100, 30);
+        button_exit.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == button_exit)
+                    System.exit(0);
+            }
+        });
 
-        inputField.addActionListener(this);  // При нажатии Enter обрабатываем ввод
+        inputField.addActionListener(this);  // При нажатии Enter
 
         setVisible(true);
         setLocationRelativeTo(null);
@@ -56,9 +65,8 @@ public class ClientApp1 extends Frame implements ActionListener, Runnable  {
     public void run() {
         try {
             while (true) {
-                // Чтение ответа от сервера
                 String response = dis.readUTF();
-                outputArea.append(response + "\n");  // Выводим ответ в текстовое поле
+                outputArea.append(response + "\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -67,6 +75,6 @@ public class ClientApp1 extends Frame implements ActionListener, Runnable  {
 
     public static void main(String[] args) {
         ClientApp clientApp = new ClientApp();
-        new Thread(clientApp).start();  // Запуск клиента в отдельном потоке
+        new Thread(clientApp).start();
     }
 }
